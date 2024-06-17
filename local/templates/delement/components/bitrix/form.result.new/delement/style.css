@@ -1,0 +1,8 @@
+.tabs-cloud__item input {
+	display: none;
+} 
+
+input.tabs__input:checked + label {
+	color: var(--blue);
+	border-color: var(--blue);
+}
