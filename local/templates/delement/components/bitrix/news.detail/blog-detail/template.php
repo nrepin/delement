@@ -60,7 +60,6 @@ $this->setFrameMode(true);
 		$author = $arResult["PROPERTIES"]["AUTHOR"]["VALUE"];
 	} else {
 		$author = preg_replace("~\(.*\)~", "", $arResult["CREATED_USER_NAME"]);
-
 	}
 
 	// Галерея

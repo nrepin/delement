@@ -13,6 +13,10 @@
 $this->setFrameMode(true);
 ?>
 
+<?if(empty($arResult["ITEMS"])) {?>
+	<div class="h3">Извините, по вашему запросу ничего не найдено</div>
+<?}?>
+
 <div class=" page-blog__cards 11">
 	<?foreach($arResult["ITEMS"] as $arItem):?>
 		<?$detailText = $arItem["DETAIL_TEXT"]; 

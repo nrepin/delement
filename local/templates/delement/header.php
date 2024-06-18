@@ -5,7 +5,7 @@ use \Bitrix\Main\Application;
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Блог</title>
+    <title><?$APPLICATION->ShowTitle()?></title>
 
     <script data-skip-moving="true">
         var SITE_TEMPLATE_PATH = "<?= SITE_TEMPLATE_PATH ?>";

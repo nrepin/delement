@@ -8,6 +8,7 @@ if ($arResult["isFormErrors"] == "Y"):?><?=$arResult["FORM_ERRORS_TEXT"];?><?end
 ?>
 <?=$arResult["FORM_HEADER"]?>
 	<input type="hidden" name="form_hidden_12" value="<?=$arParams["EMAIL_TO"]?>" />
+	<input type="hidden" name="form_hidden_20" value="<?=$APPLICATION->GetCurPage(false)?>" />
 
 <div class="form-row">
 	<div class="form-col">

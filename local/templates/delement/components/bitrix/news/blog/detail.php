@@ -17,9 +17,22 @@ if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true)
 $this->setFrameMode(true);
 $APPLICATION->SetPageProperty("PAGE_CLASS", 'page-article page-article--new');
 
+// echo "<pre>"; print_r($arResult); echo "</pre>";
+
+// данные по детальной
+$code = $arResult["VARIABLES"]["ELEMENT_CODE"];
+$res = CIBlockElement::GetList(Array(), Array("IBLOCK_ID" => $arParams["IBLOCK_ID"], "CODE" => $code));
+while($ob = $res->GetNextElement())
+{
+	$arFields = $ob->GetFields();
+	$arProps = $ob->GetProperties();
+}
+
+
+
 ?>
 <section class="section page--post page--post-new">
-        <div class="section__body page-article__wrap">
+	<div class="section__body page-article__wrap">
 			<?
 			$ElementID = $APPLICATION->IncludeComponent(
 			"bitrix:news.detail",
@@ -40,7 +53,7 @@ $APPLICATION->SetPageProperty("PAGE_CLASS", 'page-article page-article--new');
 				"BROWSER_TITLE" => $arParams["BROWSER_TITLE"],
 				"SET_CANONICAL_URL" => $arParams["DETAIL_SET_CANONICAL_URL"],
 				"SET_LAST_MODIFIED" => $arParams["SET_LAST_MODIFIED"],
-				"SET_TITLE" => $arParams["SET_TITLE"],
+				"SET_TITLE" => "N",
 				"MESSAGE_404" => $arParams["MESSAGE_404"],
 				"SET_STATUS_404" => $arParams["SET_STATUS_404"],
 				"SHOW_404" => $arParams["SHOW_404"],
@@ -82,24 +95,14 @@ $APPLICATION->SetPageProperty("PAGE_CLASS", 'page-article page-article--new');
             <aside class="page-article__aside">
 					
 					<?
-
-						//
-						// echo "<pre>"; print_r($arResult); echo "</pre>";
-						$code = $arResult["VARIABLES"]["ELEMENT_CODE"];
-						$res = CIBlockElement::GetList(Array(), Array("IBLOCK_ID" => 10, "CODE" => $code));
-						while($ob = $res->GetNextElement())
-						{
-							$arFields = $ob->GetFields();
-							$arProps = $ob->GetProperties();
-						}
-						// echo "<pre>"; print_r($arProps["OTHER_ARTICLE"]); echo "</pre>";
+						// фильтр для раздела ПОЧИТАТЬ ЕЩЕ
 						if($arProps["OTHER_ARTICLE"]["VALUE"] && count($arProps["OTHER_ARTICLE"]["VALUE"]) > 0) {
-							// привязанные статьи
+							// привязанные статьи 
 							$GLOBALS['arrFilter'] = array('ID' => $arProps["OTHER_ARTICLE"]["VALUE"]);
 						} else {
 							// выбираем из последних 50 статей 3 случайных
 							$elmId = $arFields["ID"];
-							$res = CIBlockElement::GetList(Array("ID" => "DESC"), Array("IBLOCK_ID" => 10, "!=ID" => $elmId), false, Array("nTopCount"=>50), array("ID"));
+							$res = CIBlockElement::GetList(Array("ID" => "DESC"), Array("IBLOCK_ID" => $arParams["IBLOCK_ID"], "!=ID" => $elmId), false, Array("nTopCount"=>50), array("ID"));
 							$arId = [];
 							while($ob = $res->GetNextElement())
 							{
@@ -108,15 +111,12 @@ $APPLICATION->SetPageProperty("PAGE_CLASS", 'page-article page-article--new');
 							}
 							// 3 случайных id-ка
 							$randId = array_rand(array_flip($arId), 3);
-							// echo "<pre>"; print_r($randId); echo "</pre>";
 							$GLOBALS['arrFilter'] = array('ID' => $randId);
 						}
-
-
 					?>
 
-					<?
-					$APPLICATION->IncludeComponent(
+				<?
+				$APPLICATION->IncludeComponent(
 					"bitrix:news.list",
 					"blog-list-other",
 					[
@@ -132,7 +132,7 @@ $APPLICATION->SetPageProperty("PAGE_CLASS", 'page-article page-article--new');
 						"DETAIL_URL" => $arResult["FOLDER"].$arResult["URL_TEMPLATES"]["detail"],
 						"SECTION_URL" => $arResult["FOLDER"].$arResult["URL_TEMPLATES"]["section"],
 						"IBLOCK_URL" => $arResult["FOLDER"].$arResult["URL_TEMPLATES"]["news"],
-						"SET_TITLE" => $arParams["SET_TITLE"],
+						"SET_TITLE" => "N",
 						"SET_LAST_MODIFIED" => $arParams["SET_LAST_MODIFIED"],
 						"MESSAGE_404" => $arParams["MESSAGE_404"],
 						"SET_STATUS_404" => $arParams["SET_STATUS_404"],
@@ -170,41 +170,72 @@ $APPLICATION->SetPageProperty("PAGE_CLASS", 'page-article page-article--new');
 					],
 					$component,
 					['HIDE_ICONS' => 'Y']
-				);?>
+				);
+				?>
 
 
+				<? // если есть акции, привязанные к статье, то показываем их
+				if($arProps["ACTION"]["VALUE"] && count($arProps["ACTION"]["VALUE"])>0) {
+					$GLOBALS['arrFilter'] = array('ID' => $arProps["ACTION"]["VALUE"]);
 
-				<?/*
-                <div class="promotions promotions--sticky-position">
-                    <a class="promotions__link" href="" target="_blank">Выгодные предложения и акции</a>
-
-                    <ul class="promotions__list">
-                        <li class="promotions__item">
-                            <div class="promotions__item-img">
-                                <img src="/local/templates/delement/frontend/assets/images/post/promotion.jpg" width="146" height="140" alt="">
-                            </div>
-                            <a class="promotions__item-link" href="">Круглый год! Установка и год обслуживания SSL-сертификат в подарок</a>
-                        </li>
-
-                        <li class="promotions__item">
-                            <div class="promotions__item-img">
-                                <img src="/local/templates/delement/frontend/assets/images/post/promotion.jpg" width="146" height="140" alt="">
-                            </div>
-                            <a class="promotions__item-link" href="">Круглый год! Установка и год обслуживания SSL-сертификат в подарок</a>
-                        </li>
-
-                        <li class="promotions__item">
-                            <div class="promotions__item-img">
-                                <img src="/local/templates/delement/frontend/assets/images/post/promotion.jpg" width="146" height="140" alt="">
-                            </div>
-                            <a class="promotions__item-link" href="">Круглый год! Установка и год обслуживания SSL-сертификат в подарок</a>
-                        </li>
-                    </ul>
-                </div>
-				*/?>
-            </aside>
-
-        </div>
-
-    </section>
+					$APPLICATION->IncludeComponent(
+					"bitrix:news.list",
+					"blog-list-action",
+					[
+						"IBLOCK_TYPE" => $arParams["IBLOCK_TYPE"],
+						"IBLOCK_ID" => 12,
+						"NEWS_COUNT" => 3,
+						"SORT_BY1" => $arParams["SORT_BY1"],
+						"SORT_ORDER1" => $arParams["SORT_ORDER1"],
+						"SORT_BY2" => $arParams["SORT_BY2"],
+						"SORT_ORDER2" => $arParams["SORT_ORDER2"],
+						"FIELD_CODE" => $arParams["LIST_FIELD_CODE"],
+						"PROPERTY_CODE" => $arParams["LIST_PROPERTY_CODE"],
+						"DETAIL_URL" => $arResult["FOLDER"].$arResult["URL_TEMPLATES"]["detail"],
+						"SECTION_URL" => $arResult["FOLDER"].$arResult["URL_TEMPLATES"]["section"],
+						"IBLOCK_URL" => $arResult["FOLDER"].$arResult["URL_TEMPLATES"]["news"],
+						"SET_TITLE" => "N",
+						"SET_LAST_MODIFIED" => $arParams["SET_LAST_MODIFIED"],
+						"MESSAGE_404" => $arParams["MESSAGE_404"],
+						"SET_STATUS_404" => $arParams["SET_STATUS_404"],
+						"SHOW_404" => $arParams["SHOW_404"],
+						"FILE_404" => $arParams["FILE_404"],
+						"INCLUDE_IBLOCK_INTO_CHAIN" => $arParams["INCLUDE_IBLOCK_INTO_CHAIN"],
+						"CACHE_TYPE" => $arParams["CACHE_TYPE"],
+						"CACHE_TIME" => $arParams["CACHE_TIME"],
+						"CACHE_FILTER" => $arParams["CACHE_FILTER"],
+						"CACHE_GROUPS" => $arParams["CACHE_GROUPS"],
+						"DISPLAY_TOP_PAGER" => "N",
+						"DISPLAY_BOTTOM_PAGER" => "N",
+						"PAGER_TITLE" => $arParams["PAGER_TITLE"],
+						"PAGER_TEMPLATE" => $arParams["PAGER_TEMPLATE"],
+						"PAGER_SHOW_ALWAYS" => $arParams["PAGER_SHOW_ALWAYS"],
+						"PAGER_DESC_NUMBERING" => $arParams["PAGER_DESC_NUMBERING"],
+						"PAGER_DESC_NUMBERING_CACHE_TIME" => $arParams["PAGER_DESC_NUMBERING_CACHE_TIME"],
+						"PAGER_SHOW_ALL" => $arParams["PAGER_SHOW_ALL"],
+						"PAGER_BASE_LINK_ENABLE" => $arParams["PAGER_BASE_LINK_ENABLE"],
+						"PAGER_BASE_LINK" => $arParams["PAGER_BASE_LINK"],
+						"PAGER_PARAMS_NAME" => $arParams["PAGER_PARAMS_NAME"],
+						"DISPLAY_DATE" => $arParams["DISPLAY_DATE"],
+						"DISPLAY_NAME" => "Y",
+						"DISPLAY_PICTURE" => $arParams["DISPLAY_PICTURE"],
+						"DISPLAY_PREVIEW_TEXT" => $arParams["DISPLAY_PREVIEW_TEXT"],
+						"PREVIEW_TRUNCATE_LEN" => $arParams["PREVIEW_TRUNCATE_LEN"],
+						"ACTIVE_DATE_FORMAT" => $arParams["LIST_ACTIVE_DATE_FORMAT"],
+						"USE_PERMISSIONS" => $arParams["USE_PERMISSIONS"],
+						"GROUP_PERMISSIONS" => $arParams["GROUP_PERMISSIONS"],
+						"HIDE_LINK_WHEN_NO_DETAIL" => $arParams["HIDE_LINK_WHEN_NO_DETAIL"],
+						"CHECK_DATES" => $arParams["CHECK_DATES"],
+						"COUNT_WORDS" => $arParams["COUNT_WORDS"],
+						"FILTER_NAME" => 'arrFilter',
+						"USE_FILTER" => "Y",
+					],
+					$component,
+					['HIDE_ICONS' => 'Y']
+					);
+				}?>
+				
+        	</aside>
+    </div>
+</section>
 

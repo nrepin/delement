@@ -16,6 +16,84 @@ if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true)
 /** @var CBitrixComponent $component */
 $this->setFrameMode(true);
 
+$arListValue = [];
+$property_enums = CIBlockPropertyEnum::GetList(Array("ID"=>"ASC"), Array("IBLOCK_ID"=>$arParams["IBLOCK_ID"], "CODE"=>"HASHTAGS"));
+while($enum_fields = $property_enums->GetNext()) {
+	$arListValue[] = $enum_fields;
+}
+$arListValueFilter = [];
+$arListIdFilter = [];
+if($_GET["tag"]) {
+    $arTag = explode(",", $_GET["tag"]);
+    foreach($arListValue as $enum_fields) {
+        if(in_array($enum_fields["ID"], $arTag)) {
+            $arListValueFilter[] = $enum_fields["VALUE"];
+            $arListIdFilter[] = $enum_fields["ID"];
+        }
+    }
+}
+$currPage = $APPLICATION->GetCurPage(false);
+?>
+
+
+<div class="page-blog__ctrl">
+
+	<div 
+		class="page-blog__collapse-wrapper" 
+		data-js-expand='{"visibleItems":"10"}'
+	>
+		<div class="page-blog__ctrl-row">
+			<div class="page-blog__no-collapse-row">
+
+				<?if($arParams["USE_SEARCH"]=="Y") {?>
+					<?php
+						$APPLICATION->IncludeComponent(
+						"bitrix:search.form",
+						"blog",
+						[
+							"PAGE" => $arResult["FOLDER"].$arResult["URL_TEMPLATES"]["search"]
+						],
+						$component,
+							['HIDE_ICONS' => 'Y']
+					);
+
+				}?>
+
+				<button class="page-blog__collapse-button" data-js-expand-btn>
+					<span class="show-more">Ещё тэги</span>
+					<svg class="page-blog__collapse-btn-icon show-more" width="15" height="10">
+						<use href="#icon-arrow"></use>
+					</svg>
+
+					<span class="show-less">Скрыть тэги</span>
+					<svg class="page-blog__collapse-btn-icon show-less" width="15" height="10">
+						<use href="#icon-arrow"></use>
+					</svg>
+				</button>
+			</div>
+			<div class="page-blog__collapse-container">
+				<div class="tags tags-slider">
+					<div class="tags__container swiper-container ">
+						<div class="tags__wrapper swiper-wrapper" data-js-expand-item-container>
+
+							<?foreach($arListValue as $key => $item) {?>
+								<div class="tags__item swiper-slide">
+									<a href="<?=$currPage.'?tag='.$item["ID"]?>" 
+										class="checkbox__emulator <?=in_array($item["ID"], $arListIdFilter) ? 'active' : ''?>"
+									><?=$item["VALUE"]?> </a>
+								</div>
+							<?}?>                                        
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<?
+$GLOBALS['arrFilter'] = ["PROPERTY_HASHTAGS_VALUE" => $arListValueFilter];
 
 $APPLICATION->IncludeComponent(
 	"bitrix:news.list",
@@ -63,10 +141,11 @@ $APPLICATION->IncludeComponent(
 		"ACTIVE_DATE_FORMAT" => $arParams["LIST_ACTIVE_DATE_FORMAT"],
 		"USE_PERMISSIONS" => $arParams["USE_PERMISSIONS"],
 		"GROUP_PERMISSIONS" => $arParams["GROUP_PERMISSIONS"],
-		"FILTER_NAME" => $arParams["FILTER_NAME"],
 		"HIDE_LINK_WHEN_NO_DETAIL" => $arParams["HIDE_LINK_WHEN_NO_DETAIL"],
 		"CHECK_DATES" => $arParams["CHECK_DATES"],
 		"COUNT_WORDS" => $arParams["COUNT_WORDS"],
+		"FILTER_NAME" => "arrFilter",
+        "USE_FILTER" => "Y",
 	],
 	$component,
 	['HIDE_ICONS' => 'Y']
