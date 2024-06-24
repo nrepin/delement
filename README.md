@@ -1,3 +1,8 @@
+https://docs.google.com/document/d/1_-TBp4KQ57aDYv-4gsCIxN0TArZCh1R5l2u7Ukil_2g/edit
+
+прочитать ТЗ можно по ссылке
+===========================================
+
 Задание #1. 
 
 Интеграция Блога. 
